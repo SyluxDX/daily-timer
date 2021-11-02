@@ -9,5 +9,6 @@ A timer for Daily Standup meetings
   - [ ] Create structure like for better display data
 - [ ] Timer/stopwatch thread
 - [ ] User input thread
-- [ ] Parser json configuration
-- [ ] Override configurations order
+- [x] Parser json configuration
+- [x] Override configurations order
+- [ ] Update README

@@ -2,84 +2,104 @@
 import curses
 from number_map import number_map
 
-class terminal():
+class Terminal():
     """ class warper curses to display """
+    WHITE = 0
+    RED = 1
+    YELLO = 2
+
     def __init__(self):
         # init screen
-        self.scren = curses.initscr()
+        self.screen = curses.initscr()
         # no echoing keys to screen
         curses.noecho()
         # react to keypress without Enter key
         curses.cbreak()
-        # translat special keys
-        self.scren.keypad(True)
+        # translate special keys
+        self.screen.keypad(True)
+        # enable terminal color
+        curses.start_color()
         # disable blink cursor
         curses.curs_set(0)
 
-        self.rows, self.columns = self.scren.getmaxyx()
+        # set curses colors
+        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+
+
+        self.rows, self.columns = self.screen.getmaxyx()
         self.middle_row = int(self.rows / 2)
         self.middle_column = int(self.columns / 2)
-        self.minutes = 0
-        self.seconds = 0
-        
+        self.written_minutes = 0
+        self.written_seconds = 0
+
+        self.timer_windows = None
+        self.color = 0
+        self.force_update = False
 
     def __enter__(self):
         return self
 
     def __exit__(self, exception_type, exception_value, exception_traceback):
+        print("type:", exception_type)
         self.close()
 
     def close(self):
+        """ Cleanup console """
         curses.curs_set(1)
-        self.scren.keypad(False)
+        self.screen.keypad(False)
         curses.nocbreak()
         curses.echo()
         # destroy screen
         curses.endwin()
 
-def countup(screen):
-    curses.curs_set(0)
-    num_rows, num_cols = screen.getmaxyx()
-    middle_row = int(num_rows / 2) 
-    middle_column = int(num_cols / 2) #-50
+    def initiate_timer(self, seconds=0):
+        """ Initiate timer windows positions and values """
+        # timer_windows = [:, 1, 2, 3, 4] -> 12:34
+        self.timer_windows = [curses.newwin(6, 5, self.middle_row-3, self.middle_column-1),
+                              curses.newwin(6, 9, self.middle_row-3, self.middle_column-19),
+                              curses.newwin(6, 9, self.middle_row-3, self.middle_column-10),
+                              curses.newwin(6, 9, self.middle_row-3, self.middle_column+4),
+                              curses.newwin(6, 9, self.middle_row-3, self.middle_column+13)]
 
-    curses.init_pair(1, curses.COLOR_RED, curses.COLOR_WHITE)
-    curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_WHITE)
+        self.update_timer(seconds, True)
 
-    windows = [curses.newwin(6, 5, middle_row-3, middle_column-1),
-        curses.newwin(6, 9, middle_row-3, middle_column-19),
-        curses.newwin(6, 9, middle_row-3, middle_column-10),
-        curses.newwin(6, 9, middle_row-3, middle_column+4),
-        curses.newwin(6, 9, middle_row-3, middle_column+13)]
-    # dot_window = curses.newwin(6, 2, middle_row, middle_column-1)
-    # number2_window = curses.newwin(6, 9, middle_row-3, middle_column-10)
-    # number1_window = curses.newwin(6, 9, middle_row-3, middle_column-19)
-    # number3_window = curses.newwin(6, 9, middle_row-3, middle_column+1)
-    # number4_window = curses.newwin(6, 9, middle_row-3, middle_column+10)
-    
-    # my_window.addstr(line, curses.color_pair(1))
-    try:
-        windows[0].addstr(number_map[':'])
-    except curses.error:
-        pass
-    
-    windows[0].refresh()
+# TODO: Redesign this function to only update only once, preferably on the next update
+    def update_color(self, color):
+        """ asd """
+        self.color = color
+        self.force_update = True
 
-    # for wind in windows[1:]:
-    #     wind.addstr(number_map['0'])
-    #     wind.refresh()
+    def update_timer(self, seconds, force=False):
+        """ Update timer values on screen, only write changes from previous update, use
+        argument force=True to for """
+        force = force or self.force_update
+        minutes = f"{seconds//60:02d}"
+        if force:
+            # update colon
+            self.timer_windows[0].erase()
+            self.timer_windows[0].addstr(number_map[':'], curses.color_pair(self.color))
+            self.timer_windows[0].refresh()
 
-    for i in range(10):
-        for wind in windows[1:]:
-            wind.erase()
-            # wind.clear()
-            wind.addstr(number_map[str(i)])
-            wind.refresh()
-        curses.napms(500)
+        if force or self.written_minutes != minutes:
+            self.timer_windows[1].erase()
+            self.timer_windows[1].addstr(number_map[minutes[0]], curses.color_pair(self.color))
+            self.timer_windows[1].refresh()
 
+            self.timer_windows[2].erase()
+            self.timer_windows[2].addstr(number_map[minutes[1]], curses.color_pair(self.color))
+            self.timer_windows[2].refresh()
+            # update last written
+            self.written_minutes = minutes
+        
+        seconds = f"{seconds%60:02d}"
+        if force or self.written_seconds != seconds:
+            self.timer_windows[3].erase()
+            self.timer_windows[3].addstr(number_map[seconds[0]], curses.color_pair(self.color))
+            self.timer_windows[3].refresh()
 
-    _ = windows[0].getch()
-
-
-if __name__ == '__main__':
-    curses.wrapper(countup)
+            self.timer_windows[4].erase()
+            self.timer_windows[4].addstr(number_map[seconds[1]], curses.color_pair(self.color))
+            self.timer_windows[4].refresh()
+            # update last written
+            self.written_seconds = seconds

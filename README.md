@@ -9,10 +9,10 @@ A Timer for Daily Standup meetings
  - Warning colors
 
 ### Release 1:
- - Person list
+ - Participants list
 
 ### Release 2:
  - Timer Mode
 
 ### Release 3:
- - Persons Statistics
+ - Participants Statistics

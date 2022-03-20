@@ -1,7 +1,17 @@
 """ main script for daily timer """
-import windows
-import time
 
+import time
+import json
+import argparse
+import windows
+from collections import namedtuple
+
+def get_configurations(filename):
+    """ Read json configurations to a namedtupple enabeling dot access """
+    config = namedtuple("configs", ["time","warning","participants","sequencial"])
+    with open(filename , "r") as cfp:
+        data = json.load(cfp)
+    return config(data["time"], data["warning"], data["participants"], data["sequencial"])
 
 def test():
     time.sleep(1)
@@ -21,8 +31,16 @@ def test():
             time.sleep(0.25)
 
 
-    # terminal.restorescreen()
+
+_parser = argparse.ArgumentParser(description='Timer for Daiçy Timer.')
+_parser.add_argument("-c", "--config", default="team.json",
+                    help='path for configuration')
+
+ARGS = _parser.parse_args()
 
 if __name__ == "__main__":
     print("Hello")
-    test()
+    # test()
+    config = get_configurations(ARGS.config)
+    print(config)
+    

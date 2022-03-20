@@ -1,10 +1,10 @@
 {
-    "time": 180,
+    "time": 20,
     "warning": "10",
     "participants":[
         "John",
         "Marcus",
         "Abigal"
     ],
-    "sequencial": false
+    "sequencial": true
 }

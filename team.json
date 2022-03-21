@@ -1,6 +1,6 @@
 {
     "time": 20,
-    "warning": "10",
+    "warning": 10,
     "participants":[
         "John",
         "Marcus",

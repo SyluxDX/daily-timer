@@ -5,8 +5,16 @@ from number_map import number_map
 class Terminal():
     """ class warper curses to display """
     WHITE = 0
-    RED = 1
-    YELLO = 2
+    GREEN = 1
+    YELLOW = 2
+    RED = 3
+
+    #
+    KEY_LEFT = curses.KEY_LEFT
+    KEY_RIGHT = curses.KEY_RIGHT
+    KEY_SPACE = ord(" ")
+    KEY_EXIT = ord("q")
+
 
     def __init__(self):
         # init screen
@@ -17,14 +25,17 @@ class Terminal():
         curses.cbreak()
         # translate special keys
         self.screen.keypad(True)
+        # set getch() be non-blocking.
+        self.screen.nodelay(True)
         # enable terminal color
         curses.start_color()
         # disable blink cursor
         curses.curs_set(0)
 
         # set curses colors
-        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
 
 
         self.rows, self.columns = self.screen.getmaxyx()
@@ -47,6 +58,8 @@ class Terminal():
     def close(self):
         """ Cleanup console """
         curses.curs_set(1)
+        # needed?
+        self.screen.nodelay(False)
         self.screen.keypad(False)
         curses.nocbreak()
         curses.echo()
@@ -62,7 +75,13 @@ class Terminal():
                               curses.newwin(6, 9, self.middle_row-3, self.middle_column+4),
                               curses.newwin(6, 9, self.middle_row-3, self.middle_column+13)]
 
+        self.debug_window = curses.newwin(1, self.columns, 0, 0)
         self.update_timer(seconds, True)
+
+    def debug_print(self, line):
+        self.debug_window.erase()
+        self.debug_window.addstr(line)
+        self.debug_window.refresh()
 
 # TODO: Redesign this function to only update only once, preferably on the next update
     def update_color(self, color):
@@ -103,3 +122,8 @@ class Terminal():
             self.timer_windows[4].refresh()
             # update last written
             self.written_seconds = seconds
+
+    def get_key(self):
+        """ asda """
+        key = self.screen.getch()
+        return key

@@ -7,6 +7,50 @@ from datetime import (datetime, timedelta)
 
 import windows
 
+class _usertimer:
+    def __init__(self, user, seconds) -> None:
+        self.user = user
+        self.seconds = seconds
+
+class UsersTimer:
+    def __init__(self, users_list: list) -> None:
+        # get max len of user name
+        max_name = 0
+        for name in users_list:
+            max_name = max(max_name, len(name))
+
+        self.users = [_usertimer(user+" "*(max_name-len(user)), 0) for user in users_list]
+        self.current = 0
+
+    def set_current_timer(self, seconds: int) -> None:
+        self.users[self.current].seconds = seconds
+
+    def next_timer(self) -> int:
+        self.current += 1
+        if self.current == len(self.users):
+            self.current = 0
+        return self.users[self.current].seconds
+
+    def previous_timer(self) -> int:
+        self.current -= 1
+        if self.current < 0:
+            self.current = len(self.users)-1
+        return self.users[self.current].seconds
+
+    def str_list(self) -> list:
+        text = []
+        for i, user in enumerate(self.users):
+            prefix = "  "
+            if i == self.current:
+                prefix = "->"
+            text.append("{} {} {:02d}:{:02d}".format(
+                prefix,
+                user.user,
+                user.seconds//60,
+                user.seconds%60,
+            ))
+        return text
+
 def get_configurations(filename):
     """ Read json configurations to a namedtupple enabeling dot access """
     configs = namedtuple("configs", ["time","warning","participants","sequencial"])
@@ -15,26 +59,35 @@ def get_configurations(filename):
     return configs(data["time"], data["warning"], data["participants"], data["sequencial"])
 
 def main_loop(configs, ticks=0.25):
-    """ script main loop. Hadles timer ticks, and keyboard keys"""
+    """ script main loop. Handles timer ticks, and keyboard keys"""
     ## Variables
     running = False
     running_color = windows.Terminal.WHITE
     _aux_tick = timedelta(seconds=1)
     next_tick = None
+
+    users = UsersTimer(configs.participants)
     seconds = 0
-    previous_seconds = 0
+    # previous_seconds = 0
+
     ### create timer window
     with windows.Terminal() as terminal:
+        # force first refresh
         _ = terminal.get_key()
         # set color as pause (green)
         terminal.update_color(terminal.GREEN)
         terminal.initiate_timer(seconds)
-        while True:
-            # terminal.debug_print(f"{running}, {next_tick}")
+        terminal.initiate_users(users.str_list())
 
+        while True:
+            ## Get key press
             key = terminal.get_key()
+
+            ## Pressed exit key
             if key == terminal.KEY_EXIT:
                 break
+
+            ## Pressed start/pause key
             if key == terminal.KEY_SPACE:
                 # toggle running status
                 running = not running
@@ -45,25 +98,45 @@ def main_loop(configs, ticks=0.25):
                 else:
                     terminal.update_color(terminal.GREEN)
                     terminal.update_timer(seconds)
+
+            ## Press next person key
             if key == terminal.KEY_RIGHT:
-                previous_seconds = seconds
-                seconds = 0
-                running_color = terminal.WHITE
-                terminal.update_color(running_color)
-                terminal.update_timer(seconds)
-                next_tick = datetime.utcnow() + _aux_tick
-            if key == terminal.KEY_LEFT:
-                seconds = previous_seconds
+                # update current user
+                users.set_current_timer(seconds)
+                # get next user
+                seconds = users.next_timer()
+                # set timer color
                 running_color = terminal.WHITE
                 if seconds >= configs.warning:
                     running_color = terminal.YELLOW
                 if seconds >= configs.time:
                     running_color = terminal.RED
-
+                # start timer
                 terminal.update_color(running_color)
                 terminal.update_timer(seconds)
+                terminal.update_users(users.str_list())
                 next_tick = datetime.utcnow() + _aux_tick
 
+            ## Press previous person key
+            if key == terminal.KEY_LEFT:
+                # update current user
+                users.set_current_timer(seconds)
+                terminal.update_users(users.str_list())
+                # get next user
+                seconds = users.previous_timer()
+                # set timer color
+                running_color = terminal.WHITE
+                if seconds >= configs.warning:
+                    running_color = terminal.YELLOW
+                if seconds >= configs.time:
+                    running_color = terminal.RED
+                # start timer
+                terminal.update_color(running_color)
+                terminal.update_timer(seconds)
+                terminal.update_users(users.str_list())
+                next_tick = datetime.utcnow() + _aux_tick
+
+            ## Timer loop
             if running is True:
                 if next_tick is None:
                     next_tick = datetime.utcnow() + _aux_tick
@@ -83,7 +156,7 @@ def main_loop(configs, ticks=0.25):
 
             time.sleep(ticks)
 
-_parser = argparse.ArgumentParser(description='Timer for Daiçy Timer.')
+_parser = argparse.ArgumentParser(description='Timer for Daily Timer.')
 _parser.add_argument("-c", "--config", default="team.json",
                     help='path for configuration')
 

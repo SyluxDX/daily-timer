@@ -15,7 +15,6 @@ class Terminal():
     KEY_SPACE = ord(" ")
     KEY_EXIT = ord("q")
 
-
     def __init__(self):
         # init screen
         self.screen = curses.initscr()
@@ -37,16 +36,22 @@ class Terminal():
         curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
         curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
 
-
+        # windows variables
         self.rows, self.columns = self.screen.getmaxyx()
         self.middle_row = int(self.rows / 2)
         self.middle_column = int(self.columns / 2)
         self.written_minutes = 0
         self.written_seconds = 0
 
+        # timer variables
         self.timer_windows = None
         self.color = 0
         self.force_update = False
+
+        # users variables
+        self.users_window = None
+        self.users_nlines = 10
+        self.users_ncols = 50
 
     def __enter__(self):
         return self
@@ -69,13 +74,13 @@ class Terminal():
     def initiate_timer(self, seconds=0):
         """ Initiate timer windows positions and values """
         # timer_windows = [:, 1, 2, 3, 4] -> 12:34
-        self.timer_windows = [curses.newwin(6, 5, self.middle_row-3, self.middle_column-1),
-                              curses.newwin(6, 9, self.middle_row-3, self.middle_column-19),
-                              curses.newwin(6, 9, self.middle_row-3, self.middle_column-10),
-                              curses.newwin(6, 9, self.middle_row-3, self.middle_column+4),
-                              curses.newwin(6, 9, self.middle_row-3, self.middle_column+13)]
+        self.timer_windows = [curses.newwin(6, 5, 2, self.middle_column-1),
+                              curses.newwin(6, 9, 2, self.middle_column-19),
+                              curses.newwin(6, 9, 2, self.middle_column-10),
+                              curses.newwin(6, 9, 2, self.middle_column+4),
+                              curses.newwin(6, 9, 2, self.middle_column+13)]
 
-        self.debug_window = curses.newwin(1, self.columns, 0, 0)
+        # self.debug_window = curses.newwin(1, self.columns, 0, 0)
         self.update_timer(seconds, True)
 
     def debug_print(self, line):
@@ -85,7 +90,7 @@ class Terminal():
 
 # TODO: Redesign this function to only update only once, preferably on the next update
     def update_color(self, color):
-        """ asd """
+        """ Update timer text color """
         self.color = color
         self.force_update = True
 
@@ -110,7 +115,7 @@ class Terminal():
             self.timer_windows[2].refresh()
             # update last written
             self.written_minutes = minutes
-        
+
         seconds = f"{seconds%60:02d}"
         if force or self.written_seconds != seconds:
             self.timer_windows[3].erase()
@@ -123,7 +128,28 @@ class Terminal():
             # update last written
             self.written_seconds = seconds
 
+    ## Users timer list related functions
+    def initiate_users(self, users: list) -> None:
+        """ Initiante user window and user list """
+        # create window
+        self.users_window = curses.newwin(
+            self.users_nlines,
+            self.users_ncols,
+            11,
+            self.middle_column//2,
+        )
+        self.update_users(users)
+
+    def update_users(self, users: list) -> None:
+        text = []
+        for user in users[:self.users_nlines]:
+            text.append(user[:self.users_ncols])
+        self.users_window.erase()
+        self.users_window.addstr("\n".join(text))
+        self.users_window.refresh()
+
+    ## General Terminal functions
     def get_key(self):
-        """ asda """
+        """ Get keyboard key press """
         key = self.screen.getch()
         return key

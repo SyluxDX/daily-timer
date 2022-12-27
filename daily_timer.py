@@ -4,6 +4,7 @@ import time
 import argparse
 from collections import namedtuple
 from datetime import (datetime, timedelta)
+from random import shuffle
 
 import windows
 
@@ -53,10 +54,10 @@ class UsersTimer:
 
 def get_configurations(filename):
     """ Read json configurations to a namedtupple enabeling dot access """
-    configs = namedtuple("configs", ["time","warning","participants","sequencial"])
+    configs = namedtuple("configs", ["time","warning","participants","random"])
     with open(filename , "r", encoding="utf8") as cfp:
         data = json.load(cfp)
-    return configs(data["time"], data["warning"], data["participants"], data["sequencial"])
+    return configs(data["time"], data["warning"], data["participants"], data["randomOrder"])
 
 def main_loop(configs, ticks=0.25):
     """ script main loop. Handles timer ticks, and keyboard keys"""
@@ -66,6 +67,8 @@ def main_loop(configs, ticks=0.25):
     _aux_tick = timedelta(seconds=1)
     next_tick = None
 
+    if configs.random:
+        shuffle(configs.participants)
     users = UsersTimer(configs.participants)
     seconds = 0
     # previous_seconds = 0

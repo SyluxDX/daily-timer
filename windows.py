@@ -4,12 +4,13 @@ from number_map import number_map
 
 class Terminal():
     """ class warper curses to display """
+    # colors
     WHITE = 0
     GREEN = 1
     YELLOW = 2
     RED = 3
 
-    #
+    # keys
     KEY_LEFT = curses.KEY_LEFT
     KEY_RIGHT = curses.KEY_RIGHT
     KEY_SPACE = ord(" ")
@@ -44,14 +45,30 @@ class Terminal():
         self.written_seconds = 0
 
         # timer variables
-        self.timer_windows = None
+        self.timer_windows = list()
         self.color = 0
         self.force_update = False
+        ## Initiate timer windows positions and values
+        # timer_windows = [:, 1, 2, 3, 4] -> 12:34
+        self.timer_windows = [
+            curses.newwin(6, 5, 2, self.middle_column-1),
+            curses.newwin(6, 9, 2, self.middle_column-19),
+            curses.newwin(6, 9, 2, self.middle_column-10),
+            curses.newwin(6, 9, 2, self.middle_column+4),
+            curses.newwin(6, 9, 2, self.middle_column+13),
+        ]
 
         # users variables
-        self.users_window = None
         self.users_nlines = 10
         self.users_ncols = 50
+        ## Initiante user window
+        # create window
+        self.users_window = curses.newwin(
+            self.users_nlines,
+            self.users_ncols,
+            11,
+            self.middle_column//2,
+        )
 
     def __enter__(self):
         return self
@@ -71,24 +88,7 @@ class Terminal():
         # destroy screen
         curses.endwin()
 
-    def initiate_timer(self, seconds=0):
-        """ Initiate timer windows positions and values """
-        # timer_windows = [:, 1, 2, 3, 4] -> 12:34
-        self.timer_windows = [curses.newwin(6, 5, 2, self.middle_column-1),
-                              curses.newwin(6, 9, 2, self.middle_column-19),
-                              curses.newwin(6, 9, 2, self.middle_column-10),
-                              curses.newwin(6, 9, 2, self.middle_column+4),
-                              curses.newwin(6, 9, 2, self.middle_column+13)]
-
-        # self.debug_window = curses.newwin(1, self.columns, 0, 0)
-        self.update_timer(seconds, True)
-
-    def debug_print(self, line):
-        self.debug_window.erase()
-        self.debug_window.addstr(line)
-        self.debug_window.refresh()
-
-# TODO: Redesign this function to only update only once, preferably on the next update
+    ## Timer related functions
     def update_color(self, color):
         """ Update timer text color """
         self.color = color
@@ -128,21 +128,13 @@ class Terminal():
             # update last written
             self.written_seconds = seconds
 
-    ## Users timer list related functions
-    def initiate_users(self, users: list) -> None:
-        """ Initiante user window and user list """
-        # create window
-        self.users_window = curses.newwin(
-            self.users_nlines,
-            self.users_ncols,
-            11,
-            self.middle_column//2,
-        )
-        self.update_users(users)
-
-    def update_users(self, users: list) -> None:
+    ## Users list related functions
+    def update_users(self, lines: list) -> None:
+        """ Update/refresh user list window with line list
+        
+        Number of lines and size are limited to window size """
         text = []
-        for user in users[:self.users_nlines]:
+        for user in lines[:self.users_nlines]:
             text.append(user[:self.users_ncols])
         self.users_window.erase()
         self.users_window.addstr("\n".join(text))

@@ -17,10 +17,14 @@ class UsersTimer:
     def __init__(self, users_list: list) -> None:
         # get max len of user name
         max_name = 0
+        ## find max lenght of names
         for name in users_list:
             max_name = max(max_name, len(name))
 
-        self.users = [_usertimer(user+" "*(max_name-len(user)), 0) for user in users_list]
+        # Create usertimer with trailing whitespaces as padding
+        self.users = [
+            _usertimer( user+" "*(max_name-len(user) ), 0) for user in users_list
+            ]
         self.current = 0
 
     def set_current_timer(self, seconds: int) -> None:
@@ -71,7 +75,6 @@ def main_loop(configs, ticks=0.25):
         shuffle(configs.participants)
     users = UsersTimer(configs.participants)
     seconds = 0
-    # previous_seconds = 0
 
     ### create timer window
     with windows.Terminal() as terminal:
@@ -79,9 +82,9 @@ def main_loop(configs, ticks=0.25):
         _ = terminal.get_key()
         # set color as pause (green)
         terminal.update_color(terminal.GREEN)
-        terminal.initiate_timer(seconds)
-        terminal.initiate_users(users.str_list())
-
+        # write timer and user list
+        terminal.update_timer(seconds)
+        terminal.update_users(users.str_list())
         while True:
             ## Get key press
             key = terminal.get_key()
@@ -114,7 +117,7 @@ def main_loop(configs, ticks=0.25):
                     running_color = terminal.YELLOW
                 if seconds >= configs.time:
                     running_color = terminal.RED
-                # start timer
+                # update timer
                 terminal.update_color(running_color)
                 terminal.update_timer(seconds)
                 terminal.update_users(users.str_list())
@@ -133,7 +136,7 @@ def main_loop(configs, ticks=0.25):
                     running_color = terminal.YELLOW
                 if seconds >= configs.time:
                     running_color = terminal.RED
-                # start timer
+                # update timer
                 terminal.update_color(running_color)
                 terminal.update_timer(seconds)
                 terminal.update_users(users.str_list())
@@ -160,8 +163,7 @@ def main_loop(configs, ticks=0.25):
             time.sleep(ticks)
 
 _parser = argparse.ArgumentParser(description='Timer for Daily Timer.')
-_parser.add_argument("-c", "--config", default="team.json",
-                    help='path for configuration')
+_parser.add_argument("-c", "--config", default="team.json", help='path for configuration')
 
 ARGS = _parser.parse_args()
 

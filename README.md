@@ -16,3 +16,6 @@ A Timer for Daily Standup meetings
 
 ### Release 3:
  - Participants Statistics
+
+## Known bugs
+ - Switching users with timer pause sets color to white, should be green 

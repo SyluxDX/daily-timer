@@ -1,3 +1,5 @@
+""" Dictionary with git font for digits and colon """
+
 number_map = {
     "0":""" .d88b.
 .8P  88.
@@ -62,7 +64,7 @@ d8'""",
     ":":"""
  db
  VP
- 
+
  db
  VP"""
 }

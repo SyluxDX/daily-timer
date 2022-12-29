@@ -45,7 +45,7 @@ class Terminal():
         self.written_seconds = 0
 
         # timer variables
-        self.timer_windows = list()
+        self.timer_windows = []
         self.color = 0
         self.force_update = False
         ## Initiate timer windows positions and values
@@ -131,7 +131,7 @@ class Terminal():
     ## Users list related functions
     def update_users(self, lines: list) -> None:
         """ Update/refresh user list window with line list
-        
+
         Number of lines and size are limited to window size """
         text = []
         for user in lines[:self.users_nlines]:

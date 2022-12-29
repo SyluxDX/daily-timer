@@ -14,6 +14,7 @@ class _usertimer:
         self.seconds = seconds
 
 class UsersTimer:
+    """ Dataclass for users timers """
     def __init__(self, users_list: list) -> None:
         # get max len of user name
         max_name = 0
@@ -28,32 +29,31 @@ class UsersTimer:
         self.current = 0
 
     def set_current_timer(self, seconds: int) -> None:
+        """ Set/update current user timer """
         self.users[self.current].seconds = seconds
 
     def next_timer(self) -> int:
+        """ Get next user timer value and update current user to that user """
         self.current += 1
         if self.current == len(self.users):
             self.current = 0
         return self.users[self.current].seconds
 
     def previous_timer(self) -> int:
+        """ Get previous user timer value and update current user to that user """
         self.current -= 1
         if self.current < 0:
             self.current = len(self.users)-1
         return self.users[self.current].seconds
 
     def str_list(self) -> list:
+        """ Get all users names, timer and current user as list of strings """
         text = []
         for i, user in enumerate(self.users):
             prefix = "  "
             if i == self.current:
                 prefix = "->"
-            text.append("{} {} {:02d}:{:02d}".format(
-                prefix,
-                user.user,
-                user.seconds//60,
-                user.seconds%60,
-            ))
+            text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}")
         return text
 
 def get_configurations(filename):

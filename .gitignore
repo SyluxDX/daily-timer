@@ -12,3 +12,6 @@ lib64
 pip-wheel-metadata/
 share/python-wheels/
 pyvenv.cfg
+
+# Vscode
+.vscode/

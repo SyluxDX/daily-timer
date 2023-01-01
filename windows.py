@@ -58,6 +58,7 @@ class Terminal():
             curses.newwin(6, 9, 2, self.middle_column+13),
         ]
 
+        self.debug_window = curses.newwin(1,100,0,0)
         # users variables
         self.users_nlines = 10
         self.users_ncols = 50

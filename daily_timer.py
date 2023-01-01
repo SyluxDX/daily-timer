@@ -117,8 +117,10 @@ def main_loop(configs, ticks=0.25):
                     running_color = terminal.YELLOW
                 if seconds >= configs.time:
                     running_color = terminal.RED
+
                 # update timer
-                terminal.update_color(running_color)
+                if running:
+                    terminal.update_color(running_color)
                 terminal.update_timer(seconds)
                 terminal.update_users(users.str_list())
                 next_tick = datetime.utcnow() + _aux_tick
@@ -127,7 +129,6 @@ def main_loop(configs, ticks=0.25):
             if key == terminal.KEY_LEFT:
                 # update current user
                 users.set_current_timer(seconds)
-                terminal.update_users(users.str_list())
                 # get next user
                 seconds = users.previous_timer()
                 # set timer color
@@ -137,7 +138,8 @@ def main_loop(configs, ticks=0.25):
                 if seconds >= configs.time:
                     running_color = terminal.RED
                 # update timer
-                terminal.update_color(running_color)
+                if running:
+                    terminal.update_color(running_color)
                 terminal.update_timer(seconds)
                 terminal.update_users(users.str_list())
                 next_tick = datetime.utcnow() + _aux_tick

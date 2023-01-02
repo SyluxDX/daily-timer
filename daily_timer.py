@@ -1,12 +1,15 @@
 """ main script for daily timer """
 import argparse
-from time import sleep
+
+from dataclasses import dataclass
 from datetime import (datetime, timedelta)
+from time import sleep
 from random import shuffle
 
-import configurations
 import windows
+from configurations import Configurations
 
+@dataclass
 class _usertimer:
     def __init__(self, user: str, seconds: int) -> None:
         self.user = user
@@ -55,18 +58,37 @@ class UsersTimer:
             text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}")
         return text
 
-def set_color(configs, windows_controller: windows.Terminal, timer_value: int) -> int:
+def set_color(configs:Configurations, terminal: windows.Terminal, time_value: int) -> int:
     """ Returns new timer color based on the timer value (seconds) and function mode """
     # if configs.stopwatch
     # placeholder configuration
     stopwatch = True
-    color = windows_controller.WHITE
+    color = terminal.WHITE
     if stopwatch:
-        if timer_value >= configs.warning:
-            color = windows_controller.YELLOW
-        if timer_value >= configs.time:
-            color = windows_controller.RED
+        if time_value >= configs.warning:
+            color = terminal.YELLOW
+        if time_value >= configs.time:
+            color = terminal.RED
     return color
+
+def update_timer(configs:Configurations, terminal: windows.Terminal, time_value: int) -> None:
+    """ Calculate display timer based on function mode """
+    # if configs.stopwatch
+    # placeholder configuration
+    if configs.stopwatch:
+        # stopwtach mode
+        terminal.update_timer(time_value)
+    else:
+        # countdown mode
+        display_time = abs(configs.time - time_value)
+        terminal.update_timer(display_time)
+    # decide if want the following code instead
+    ## # calculate countdown display
+    ## if not stopwatch:
+    ##     time_value = abs(configs.time - time_value)
+    ## # Update display time
+    ## window_controller.update_timer(time_value)
+
 
 def main_loop(configs, ticks=0.25):
     """ script main loop. Handles timer ticks, and keyboard keys"""
@@ -88,7 +110,7 @@ def main_loop(configs, ticks=0.25):
         # set color as pause (green)
         terminal.update_color(terminal.GREEN)
         # write timer and user list
-        terminal.update_timer(seconds)
+        update_timer(configs, terminal, seconds)
         terminal.update_users(users.str_list())
         while True:
             ## Get key press
@@ -105,11 +127,9 @@ def main_loop(configs, ticks=0.25):
                 running = not running
                 if running:
                     terminal.update_color(running_color)
-                    terminal.update_timer(seconds)
                     next_tick = datetime.utcnow() + _aux_tick
                 else:
                     terminal.update_color(terminal.GREEN)
-                    terminal.update_timer(seconds)
 
             ## Press next person key
             if key == terminal.KEY_RIGHT:
@@ -123,8 +143,8 @@ def main_loop(configs, ticks=0.25):
                 # update timer
                 if running:
                     terminal.update_color(running_color)
-                terminal.update_timer(seconds)
                 terminal.update_users(users.str_list())
+                # reset next_tick
                 next_tick = datetime.utcnow() + _aux_tick
 
             ## Press previous person key
@@ -138,8 +158,8 @@ def main_loop(configs, ticks=0.25):
                 # update timer
                 if running:
                     terminal.update_color(running_color)
-                terminal.update_timer(seconds)
                 terminal.update_users(users.str_list())
+                # reset next_tick
                 next_tick = datetime.utcnow() + _aux_tick
 
             ## Timer loop
@@ -154,9 +174,9 @@ def main_loop(configs, ticks=0.25):
                     if running_color != new_color:
                         running_color = new_color
                         terminal.update_color(running_color)
-                    terminal.update_timer(seconds)
                     next_tick += _aux_tick
 
+            update_timer(configs, terminal, seconds)
             sleep(ticks)
 
 _parser = argparse.ArgumentParser(description='Timer for Daily Timer.')
@@ -165,9 +185,8 @@ _parser.add_argument("-c", "--config", default="team.json", help='path for confi
 ARGS = _parser.parse_args()
 
 if __name__ == "__main__":
-    # config = get_configurations(ARGS.config)
     try:
-        config = configurations.Configurations(ARGS.config)
+        config = Configurations(ARGS.config)
         main_loop(config)
     except KeyError as error:
         print(f"ERROR: Field {error.args[0]} not defiend in configuration file.")

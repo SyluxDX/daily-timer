@@ -1,11 +1,10 @@
 """ main script for daily timer """
-import json
-import time
 import argparse
-from collections import namedtuple
+from time import sleep
 from datetime import (datetime, timedelta)
 from random import shuffle
 
+import configurations
 import windows
 
 class _usertimer:
@@ -55,14 +54,6 @@ class UsersTimer:
                 prefix = "->"
             text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}")
         return text
-
-### ToDo: Keep named tupple or class
-def get_configurations(filename):
-    """ Read json configurations to a namedtupple enabeling dot access """
-    configs = namedtuple("configs", ["time","warning","participants","random"])
-    with open(filename , "r", encoding="utf8") as cfp:
-        data = json.load(cfp)
-    return configs(data["time"], data["warning"], data["participants"], data["randomOrder"])
 
 def set_color(configs, windows_controller: windows.Terminal, timer_value: int) -> int:
     """ Returns new timer color based on the timer value (seconds) and function mode """
@@ -166,7 +157,7 @@ def main_loop(configs, ticks=0.25):
                     terminal.update_timer(seconds)
                     next_tick += _aux_tick
 
-            time.sleep(ticks)
+            sleep(ticks)
 
 _parser = argparse.ArgumentParser(description='Timer for Daily Timer.')
 _parser.add_argument("-c", "--config", default="team.json", help='path for configuration')
@@ -174,5 +165,11 @@ _parser.add_argument("-c", "--config", default="team.json", help='path for confi
 ARGS = _parser.parse_args()
 
 if __name__ == "__main__":
-    config = get_configurations(ARGS.config)
-    main_loop(config)
+    # config = get_configurations(ARGS.config)
+    try:
+        config = configurations.Configurations(ARGS.config)
+        main_loop(config)
+    except KeyError as error:
+        print(f"ERROR: Field {error.args[0]} not defiend in configuration file.")
+    except FileNotFoundError as error:
+        print(f"ERROR: Configuration file not found with path: {ARGS.config}")

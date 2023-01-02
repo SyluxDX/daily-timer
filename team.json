@@ -6,5 +6,6 @@
         "Marcus",
         "Abigal"
     ],
-    "randomOrder": true
+    "randomOrder": true,
+    "stopwatch": true
 }

@@ -23,3 +23,11 @@ A Timer for Daily Standup meetings
 
 ### Release 3:
  - Participants Statistics
+
+### ToDo:
+ - Add Type hints to every function
+ - Add not count mode: Timer
+    - Add mode option to json file
+    - Decide if configurations should be class or keep as named tupple
+    - Change set color function to new countdown logic to coloring
+    - Change window update terminal function, with countdown logic

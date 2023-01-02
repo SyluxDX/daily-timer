@@ -9,7 +9,7 @@ from random import shuffle
 import windows
 
 class _usertimer:
-    def __init__(self, user, seconds) -> None:
+    def __init__(self, user: str, seconds: int) -> None:
         self.user = user
         self.seconds = seconds
 
@@ -56,12 +56,26 @@ class UsersTimer:
             text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}")
         return text
 
+### ToDo: Keep named tupple or class
 def get_configurations(filename):
     """ Read json configurations to a namedtupple enabeling dot access """
     configs = namedtuple("configs", ["time","warning","participants","random"])
     with open(filename , "r", encoding="utf8") as cfp:
         data = json.load(cfp)
     return configs(data["time"], data["warning"], data["participants"], data["randomOrder"])
+
+def set_color(configs, windows_controller: windows.Terminal, timer_value: int) -> int:
+    """ Returns new timer color based on the timer value (seconds) and function mode """
+    # if configs.stopwatch
+    # placeholder configuration
+    stopwatch = True
+    color = windows_controller.WHITE
+    if stopwatch:
+        if timer_value >= configs.warning:
+            color = windows_controller.YELLOW
+        if timer_value >= configs.time:
+            color = windows_controller.RED
+    return color
 
 def main_loop(configs, ticks=0.25):
     """ script main loop. Handles timer ticks, and keyboard keys"""
@@ -91,6 +105,7 @@ def main_loop(configs, ticks=0.25):
 
             ## Pressed exit key
             if key == terminal.KEY_EXIT:
+                ### ToDo: Write statictis to file here ###
                 break
 
             ## Pressed start/pause key
@@ -112,11 +127,7 @@ def main_loop(configs, ticks=0.25):
                 # get next user
                 seconds = users.next_timer()
                 # set timer color
-                running_color = terminal.WHITE
-                if seconds >= configs.warning:
-                    running_color = terminal.YELLOW
-                if seconds >= configs.time:
-                    running_color = terminal.RED
+                running_color = set_color(configs, terminal, seconds)
 
                 # update timer
                 if running:
@@ -132,11 +143,7 @@ def main_loop(configs, ticks=0.25):
                 # get next user
                 seconds = users.previous_timer()
                 # set timer color
-                running_color = terminal.WHITE
-                if seconds >= configs.warning:
-                    running_color = terminal.YELLOW
-                if seconds >= configs.time:
-                    running_color = terminal.RED
+                running_color = set_color(configs, terminal, seconds)
                 # update timer
                 if running:
                     terminal.update_color(running_color)
@@ -152,13 +159,10 @@ def main_loop(configs, ticks=0.25):
                 if datetime.utcnow() > next_tick:
                     seconds += 1
                     # check warning/burn threshold
-                    if seconds == configs.warning:
-                        running_color = terminal.YELLOW
+                    new_color = set_color(configs, terminal, seconds)
+                    if running_color != new_color:
+                        running_color = new_color
                         terminal.update_color(running_color)
-                    if seconds == configs.time:
-                        running_color = terminal.RED
-                        terminal.update_color(running_color)
-
                     terminal.update_timer(seconds)
                     next_tick += _aux_tick
 

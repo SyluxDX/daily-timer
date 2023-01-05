@@ -8,6 +8,7 @@ A Timer for Daily Standup meetings
 | warning      | int         | Number of seconds when an warning wil be displayed          |
 | participants | list of str | List of team menbers                                        |
 | randomOrder  | bool        | Flag to randomize the participants list before each startup |
+| stopwatch    | bool        | Function mode flag. True: stopwatch, False: countdown       |
 
 ## Roadmap
 ### Release 0

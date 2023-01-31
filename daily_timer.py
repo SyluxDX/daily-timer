@@ -6,8 +6,8 @@ from datetime import (datetime, timedelta)
 from time import sleep
 from random import shuffle
 
-import windows
-from configurations import Configurations
+from src import windows
+from src.configurations import Configurations
 
 @dataclass
 class _usertimer:

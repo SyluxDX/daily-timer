@@ -1,6 +1,14 @@
 # daily-timer
 A Timer for Daily Standup meetings
 
+# Key Mapping
+| Key         | Action                              |
+|-------------|-------------------------------------|
+| Left Arrow  | Select previous participant on list |
+| Right Arrow | Select next participant on list     |
+| Space       | Toggle timer pause/resume           |
+| q           | Exit application                    |
+
 # Configurations
 | Name         | Type        | Description                                                 |
 |--------------|-------------|-------------------------------------------------------------|

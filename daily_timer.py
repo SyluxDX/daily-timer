@@ -58,7 +58,7 @@ class UsersTimer:
             text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}")
         return text
 
-def set_color(configs:Configurations, terminal: windows.Terminal, time_value: int) -> int:
+def set_color(configs: Configurations, terminal: windows.Terminal, time_value: int) -> int:
     """ Returns new timer color based on the timer value (seconds) and function mode """
     # if configs.stopwatch
     # placeholder configuration
@@ -71,26 +71,16 @@ def set_color(configs:Configurations, terminal: windows.Terminal, time_value: in
             color = terminal.RED
     return color
 
-def update_timer(configs:Configurations, terminal: windows.Terminal, time_value: int) -> None:
+def update_timer(configs: Configurations, terminal: windows.Terminal, time_value: int) -> None:
     """ Calculate display timer based on function mode """
-    # if configs.stopwatch
-    # placeholder configuration
-    if configs.stopwatch:
-        # stopwtach mode
-        terminal.update_timer(time_value)
-    else:
-        # countdown mode
-        display_time = abs(configs.time - time_value)
-        terminal.update_timer(display_time)
-    # decide if want the following code instead
     ## # calculate countdown display
-    ## if not stopwatch:
-    ##     time_value = abs(configs.time - time_value)
-    ## # Update display time
-    ## window_controller.update_timer(time_value)
+    if not configs.stopwatch:
+        time_value = abs(configs.time - time_value)
 
+    # Update display time
+    terminal.update_timer(time_value)
 
-def main_loop(configs, ticks=0.25):
+def main_loop(configs: Configurations, ticks: float=0.25) -> None:
     """ script main loop. Handles timer ticks, and keyboard keys"""
     ## Variables
     running = False

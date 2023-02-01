@@ -5,20 +5,20 @@ from src.number_map import number_map
 class Terminal():
     """ class warper curses to display """
     # colors
-    WHITE = 0
-    GREEN = 1
-    YELLOW = 2
-    RED = 3
+    WHITE: int = 0
+    GREEN: int = 1
+    YELLOW: int = 2
+    RED: int = 3
 
     # keys
-    KEY_LEFT = curses.KEY_LEFT
-    KEY_RIGHT = curses.KEY_RIGHT
-    KEY_SPACE = ord(" ")
-    KEY_EXIT = ord("q")
+    KEY_LEFT: int = curses.KEY_LEFT
+    KEY_RIGHT: int = curses.KEY_RIGHT
+    KEY_SPACE: int = ord(" ")
+    KEY_EXIT: int = ord("q")
 
     def __init__(self):
         # init screen
-        self.screen = curses.initscr()
+        self.screen: curses._CursesWindow = curses.initscr()
         # no echoing keys to screen
         curses.noecho()
         # react to keypress without Enter key
@@ -41,13 +41,13 @@ class Terminal():
         self.rows, self.columns = self.screen.getmaxyx()
         self.middle_row = int(self.rows / 2)
         self.middle_column = int(self.columns / 2)
-        self.written_minutes = 0
-        self.written_seconds = 0
+        self.written_minutes: int = 0
+        self.written_seconds: int = 0
 
         # timer variables
         self.timer_windows = []
-        self.color = 0
-        self.force_update = False
+        self.color: int = 0
+        self.force_update: bool = False
         ## Initiate timer windows positions and values
         # timer_windows = [:, 1, 2, 3, 4] -> 12:34
         self.timer_windows = [
@@ -74,11 +74,11 @@ class Terminal():
     def __enter__(self):
         return self
 
-    def __exit__(self, exception_type, exception_value, exception_traceback):
+    def __exit__(self, exception_type, _exception_value, _exception_traceback) -> None:
         print("type:", exception_type)
         self.close()
 
-    def close(self):
+    def close(self) -> None:
         """ Cleanup console """
         curses.curs_set(1)
         # needed?
@@ -90,12 +90,12 @@ class Terminal():
         curses.endwin()
 
     ## Timer related functions
-    def update_color(self, color):
+    def update_color(self, color: int) -> None:
         """ Update timer text color """
         self.color = color
         self.force_update = True
 
-    def update_timer(self, seconds, force=False):
+    def update_timer(self, seconds: int, force: bool =False) -> None:
         """ Update timer values on screen, only write changes from previous update, use
         argument force=True to for """
         force = force or self.force_update
@@ -115,19 +115,19 @@ class Terminal():
             self.timer_windows[2].addstr(number_map[minutes[1]], curses.color_pair(self.color))
             self.timer_windows[2].refresh()
             # update last written
-            self.written_minutes = minutes
+            self.written_minutes = int(minutes)
 
-        seconds = f"{seconds%60:02d}"
+        str_seconds = f"{seconds%60:02d}"
         if force or self.written_seconds != seconds:
             self.timer_windows[3].erase()
-            self.timer_windows[3].addstr(number_map[seconds[0]], curses.color_pair(self.color))
+            self.timer_windows[3].addstr(number_map[str_seconds[0]], curses.color_pair(self.color))
             self.timer_windows[3].refresh()
 
             self.timer_windows[4].erase()
-            self.timer_windows[4].addstr(number_map[seconds[1]], curses.color_pair(self.color))
+            self.timer_windows[4].addstr(number_map[str_seconds[1]], curses.color_pair(self.color))
             self.timer_windows[4].refresh()
             # update last written
-            self.written_seconds = seconds
+            self.written_seconds = int(seconds)
 
     ## Users list related functions
     def update_users(self, lines: list) -> None:
@@ -142,7 +142,7 @@ class Terminal():
         self.users_window.refresh()
 
     ## General Terminal functions
-    def get_key(self):
+    def get_key(self) -> int:
         """ Get keyboard key press """
         key = self.screen.getch()
         return key

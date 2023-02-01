@@ -34,4 +34,3 @@ A Timer for Daily Standup meetings
  - Participants Statistics
 
 ### ToDo:
- - Add Type hints to every function

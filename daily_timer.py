@@ -8,6 +8,7 @@ from random import shuffle
 
 from src import windows
 from src.configurations import Configurations
+from src import team_statistics as stats
 
 @dataclass
 class _usertimer:
@@ -17,7 +18,7 @@ class _usertimer:
 
 class UsersTimer:
     """ Dataclass for users timers """
-    def __init__(self, users_list: list) -> None:
+    def __init__(self, users_list: list, stats: dict) -> None:
         # get max len of user name
         max_name = 0
         ## find max lenght of names
@@ -29,6 +30,7 @@ class UsersTimer:
             _usertimer( user+" "*(max_name-len(user) ), 0) for user in users_list
             ]
         self.current = 0
+        self.stats = stats
 
     def set_current_timer(self, seconds: int) -> None:
         """ Set/update current user timer """
@@ -55,8 +57,12 @@ class UsersTimer:
             prefix = "  "
             if i == self.current:
                 prefix = "->"
-            text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}")
+            stats = self.stats[user.user.strip()]
+            text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}    {stats}")
         return text
+    
+    def get_list(self) -> list:
+        return [(user.user, user.seconds) for user in self.users]
 
 def set_color(configs: Configurations, terminal: windows.Terminal, time_value: int) -> int:
     """ Returns new timer color based on the timer value (seconds) and function mode """
@@ -80,7 +86,7 @@ def update_timer(configs: Configurations, terminal: windows.Terminal, time_value
     # Update display time
     terminal.update_timer(time_value)
 
-def main_loop(configs: Configurations, ticks: float=0.25) -> None:
+def main_loop(configs: Configurations, stats_path: str, ticks: float=0.25) -> None:
     """ script main loop. Handles timer ticks, and keyboard keys"""
     ## Variables
     running = False
@@ -90,7 +96,8 @@ def main_loop(configs: Configurations, ticks: float=0.25) -> None:
 
     if configs.random:
         shuffle(configs.participants)
-    users = UsersTimer(configs.participants)
+    ## TODO: Change hardcoded number of last dailies to json config
+    users = UsersTimer(configs.participants, stats.read_last_dailies(stats_path, 10))
     seconds = 0
 
     ### create timer window
@@ -109,6 +116,9 @@ def main_loop(configs: Configurations, ticks: float=0.25) -> None:
             ## Pressed exit key
             if key == terminal.KEY_EXIT:
                 ### ToDo: Write statictis to file here ###
+                # update last active user timer
+                users.set_current_timer(seconds)
+                stats.write_daily_times(stats_path, users.get_list())
                 break
 
             ## Pressed start/pause key
@@ -177,7 +187,8 @@ ARGS = _parser.parse_args()
 if __name__ == "__main__":
     try:
         config = Configurations(ARGS.config)
-        main_loop(config)
+        stat_filename = f"{ARGS.config[:-5]}_stats.csv"
+        main_loop(config, stat_filename)
     except KeyError as error:
         print(f"ERROR: Field {error.args[0]} not defiend in configuration file.")
     except FileNotFoundError as error:

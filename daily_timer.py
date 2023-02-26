@@ -31,6 +31,10 @@ class UsersTimer:
             ]
         self.current = 0
         self.stats = stats
+        # check if stat is empty, if so create dict with users wihtout statistics
+        if not self.stats:
+            for user in users_list:
+                self.stats[user] = ""
 
     def set_current_timer(self, seconds: int) -> None:
         """ Set/update current user timer """
@@ -57,24 +61,21 @@ class UsersTimer:
             prefix = "  "
             if i == self.current:
                 prefix = "->"
-            stats = self.stats[user.user.strip()]
-            text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}    {stats}")
+            stats = f"        {self.stats[user.user.strip()]}"
+            text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}{stats}")
         return text
     
     def get_list(self) -> list:
         return [(user.user, user.seconds) for user in self.users]
 
 def set_color(configs: Configurations, terminal: windows.Terminal, time_value: int) -> int:
-    """ Returns new timer color based on the timer value (seconds) and function mode """
-    # if configs.stopwatch
-    # placeholder configuration
-    stopwatch = True
+    """ Returns new timer color based on the timer value (seconds) """
     color = terminal.WHITE
-    if stopwatch:
-        if time_value >= configs.warning:
-            color = terminal.YELLOW
-        if time_value >= configs.time:
-            color = terminal.RED
+    if time_value >= configs.warning:
+        color = terminal.YELLOW
+    if time_value >= configs.time:
+        color = terminal.RED
+    
     return color
 
 def update_timer(configs: Configurations, terminal: windows.Terminal, time_value: int) -> None:
@@ -96,26 +97,30 @@ def main_loop(configs: Configurations, stats_path: str, ticks: float=0.25) -> No
 
     if configs.random:
         shuffle(configs.participants)
-    ## TODO: Change hardcoded number of last dailies to json config
-    users = UsersTimer(configs.participants, stats.read_last_dailies(stats_path, 10))
+    
+    user_stats = {}
+    if configs.stats_display:
+        user_stats = stats.read_last_dailies(stats_path, config.stats_number)
+
+    users = UsersTimer(configs.participants, user_stats)
     seconds = 0
 
     ### create timer window
     with windows.Terminal() as terminal:
-        # force first refresh
+        # force first refresh and set color as pause (green)
         _ = terminal.get_key()
-        # set color as pause (green)
         terminal.update_color(terminal.GREEN)
+
         # write timer and user list
         update_timer(configs, terminal, seconds)
         terminal.update_users(users.str_list())
+
         while True:
             ## Get key press
             key = terminal.get_key()
 
             ## Pressed exit key
             if key == terminal.KEY_EXIT:
-                ### ToDo: Write statictis to file here ###
                 # update last active user timer
                 users.set_current_timer(seconds)
                 stats.write_daily_times(stats_path, users.get_list())
@@ -133,32 +138,31 @@ def main_loop(configs: Configurations, stats_path: str, ticks: float=0.25) -> No
 
             ## Press next person key
             if key == terminal.KEY_RIGHT:
-                # update current user
+                # update current user and get seconds of the next user
                 users.set_current_timer(seconds)
-                # get next user
                 seconds = users.next_timer()
-                # set timer color
-                running_color = set_color(configs, terminal, seconds)
 
-                # update timer
+                # set timer color and update timer
+                running_color = set_color(configs, terminal, seconds)
                 if running:
                     terminal.update_color(running_color)
                 terminal.update_users(users.str_list())
+
                 # reset next_tick
                 next_tick = datetime.utcnow() + _aux_tick
 
             ## Press previous person key
             if key == terminal.KEY_LEFT:
-                # update current user
+                # update current user and get seconds from previous user
                 users.set_current_timer(seconds)
-                # get next user
                 seconds = users.previous_timer()
-                # set timer color
+
+                # set timer color and update timer
                 running_color = set_color(configs, terminal, seconds)
-                # update timer
                 if running:
                     terminal.update_color(running_color)
                 terminal.update_users(users.str_list())
+
                 # reset next_tick
                 next_tick = datetime.utcnow() + _aux_tick
 

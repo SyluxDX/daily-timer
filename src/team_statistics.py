@@ -10,9 +10,19 @@ def read_last_dailies(filename:str, dailies_to_import:int) -> dict:
     daily = None
     dailies = []
     team = {}
+    ## check if file exists
+    if not os.path.exists(filename):
+        return statistics
+
     ## read file
+    skip_line = True
     with open(filename, "r", encoding="utf8") as ifp:
         for lines in ifp:
+            # skip header line
+            if skip_line:
+                skip_line = False
+                continue
+
             date, member, seconds = lines.strip().split(",")
             if daily is None:
                 daily = date

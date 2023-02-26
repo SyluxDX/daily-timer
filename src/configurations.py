@@ -10,6 +10,8 @@ class Configurations:
     participants: list
     random: bool
     stopwatch: bool
+    stats_display: bool
+    stats_number : int
 
     def __init__(self, filename) -> None:
         # read file
@@ -21,7 +23,9 @@ class Configurations:
         self.participants = raw_config["participants"]
         self.random = raw_config["randomOrder"]
         self.stopwatch = raw_config["stopwatch"]
+        self.stats_display = raw_config["stats"]["display"]
+        self.stats_number = raw_config["stats"]["lastDailies"]
 
         if not self.stopwatch:
-            # update warning limit in ccountdown mode
+            # update warning limit in countdown mode
             self.warning = self.time - self.warning

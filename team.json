@@ -7,5 +7,9 @@
         "Abigal"
     ],
     "randomOrder": true,
-    "stopwatch": true
+    "stopwatch": true,
+    "stats":{
+        "display": true,
+        "lastDailies": 30
+    }
 }

@@ -13,6 +13,11 @@ pip-wheel-metadata/
 share/python-wheels/
 pyvenv.cfg
 
+# PyInstaller folders
+build
+dist
+*.spec
+
 # Vscode
 .vscode/
 

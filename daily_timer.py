@@ -30,10 +30,13 @@ class UsersTimer:
             _usertimer( user+" "*(max_name-len(user) ), 0) for user in users_list
             ]
         self.current = 0
-        self.stats = stats
-        # check if stat is empty, if so create dict with users wihtout statistics
-        if not self.stats:
-            for user in users_list:
+
+        # initiate stats with current users:
+        self.stats = {}
+        for user in users_list:
+            if user in stats:
+                self.stats[user] = stats[user]
+            else:
                 self.stats[user] = ""
 
     def set_current_timer(self, seconds: int) -> None:
@@ -189,11 +192,13 @@ _parser.add_argument("-c", "--config", default="team.json", help='path for confi
 ARGS = _parser.parse_args()
 
 if __name__ == "__main__":
+    config = None
     try:
         config = Configurations(ARGS.config)
-        stat_filename = f"{ARGS.config[:-5]}_stats.csv"
-        main_loop(config, stat_filename)
     except KeyError as error:
         print(f"ERROR: Field {error.args[0]} not defiend in configuration file.")
     except FileNotFoundError as error:
         print(f"ERROR: Configuration file not found with path: {ARGS.config}")
+
+    stat_filename = f"{ARGS.config[:-5]}_stats.csv"
+    main_loop(config, stat_filename)

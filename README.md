@@ -38,5 +38,6 @@ $ pyinstaller --onefile --icon NONE daily_timer.py
 ```
 
 ### ToDo:
+- Add configuration custom exception to use the try catch without masking the error and the necessity use of sys module
 - Scroll capabilities when there are more than 10 tem members
 - Add tooltip for keys at the bottom of screen

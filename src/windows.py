@@ -1,6 +1,6 @@
 """ Class curse warper for display """
 import curses
-from src.number_map import number_map
+from number_map import number_map
 
 class Terminal():
     """ class warper curses to display """
@@ -18,7 +18,7 @@ class Terminal():
 
     def __init__(self):
         # init screen
-        self.screen: curses._CursesWindow = curses.initscr()
+        self.screen: curses.window = curses.initscr()
         # no echoing keys to screen
         curses.noecho()
         # react to keypress without Enter key

@@ -34,10 +34,14 @@ $ pyinstaller --onefile daily_timer.py
 - Install the requiments specified in the file `requirements_windows.txt`
 - Run PyInstaller on main script:
 ```sh
-$ pyinstaller --onefile --icon NONE daily_timer.py
+$ pyinstaller daily_timer.py
+```
+The script compilation can be done with a single output file with the following line, but it may the flaged as a false-positve for virus and mallware. This is due to the executable not being signed, which requires paying for a certificate.
+```sh
+$ pyinstaller --onefile daily_timer.py
 ```
 
+
 ### ToDo:
-- Add configuration custom exception to use the try catch without masking the error and the necessity use of sys module
-- Scroll capabilities when there are more than 10 tem members
+- Scroll capabilities when there are more than 10 ten members
 - Add tooltip for keys at the bottom of screen

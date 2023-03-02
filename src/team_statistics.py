@@ -52,7 +52,10 @@ def read_last_dailies(filename:str, dailies_to_import:int) -> dict:
     for member, times in team.items():
         avg_s = ceil(sum(times)/len(times))
         max_s = max(times)
-        statistics[member] = f"avg: {avg_s//60:02d}:{avg_s%60:02d}, max: {max_s//60:02d}:{max_s%60:02d}"
+        # split long line with parentheses and string literal concatenation:
+        statistics[member] = (
+            f"avg: {avg_s//60:02d}:{avg_s%60:02d}, max: {max_s//60:02d}:{max_s%60:02d}"
+        )
     return statistics
 
 def write_daily_times(filepath:str, times:list) -> None:

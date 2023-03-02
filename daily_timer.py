@@ -6,8 +6,8 @@ from datetime import (datetime, timedelta)
 from time import sleep
 from random import shuffle
 
+import src.configurations as cfgs
 from src import windows
-from src.configurations import Configurations
 from src import team_statistics as stats
 
 @dataclass
@@ -18,7 +18,7 @@ class _usertimer:
 
 class UsersTimer:
     """ Dataclass for users timers """
-    def __init__(self, users_list: list, stats: dict) -> None:
+    def __init__(self, users_list: list, statistics: dict) -> None:
         # get max len of user name
         max_name = 0
         ## find max lenght of names
@@ -34,8 +34,8 @@ class UsersTimer:
         # initiate stats with current users:
         self.stats = {}
         for user in users_list:
-            if user in stats:
-                self.stats[user] = stats[user]
+            if user in statistics:
+                self.stats[user] = statistics[user]
             else:
                 self.stats[user] = ""
 
@@ -64,24 +64,25 @@ class UsersTimer:
             prefix = "  "
             if i == self.current:
                 prefix = "->"
-            stats = f"        {self.stats[user.user.strip()]}"
-            text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}{stats}")
+            sline = f"        {self.stats[user.user.strip()]}"
+            text.append(f"{prefix} {user.user} {user.seconds//60:02d}:{user.seconds%60:02d}{sline}")
         return text
-    
+
     def get_list(self) -> list:
+        """ Return list of tuples with users and current timer value, in seconds """
         return [(user.user, user.seconds) for user in self.users]
 
-def set_color(configs: Configurations, terminal: windows.Terminal, time_value: int) -> int:
+def set_color(configs: cfgs.Configurations, terminal: windows.Terminal, time_value: int) -> int:
     """ Returns new timer color based on the timer value (seconds) """
     color = terminal.WHITE
     if time_value >= configs.warning:
         color = terminal.YELLOW
     if time_value >= configs.time:
         color = terminal.RED
-    
+
     return color
 
-def update_timer(configs: Configurations, terminal: windows.Terminal, time_value: int) -> None:
+def update_timer(configs: cfgs.Configurations, terminal: windows.Terminal, time_value: int) -> None:
     """ Calculate display timer based on function mode """
     ## # calculate countdown display
     if not configs.stopwatch:
@@ -90,7 +91,7 @@ def update_timer(configs: Configurations, terminal: windows.Terminal, time_value
     # Update display time
     terminal.update_timer(time_value)
 
-def main_loop(configs: Configurations, stats_path: str, ticks: float=0.25) -> None:
+def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=0.25) -> None:
     """ script main loop. Handles timer ticks, and keyboard keys"""
     ## Variables
     running = False
@@ -100,7 +101,7 @@ def main_loop(configs: Configurations, stats_path: str, ticks: float=0.25) -> No
 
     if configs.random:
         shuffle(configs.participants)
-    
+
     user_stats = {}
     if configs.stats_display:
         user_stats = stats.read_last_dailies(stats_path, config.stats_number)
@@ -192,13 +193,10 @@ _parser.add_argument("-c", "--config", default="team.json", help='path for confi
 ARGS = _parser.parse_args()
 
 if __name__ == "__main__":
-    config = None
     try:
-        config = Configurations(ARGS.config)
-    except KeyError as error:
-        print(f"ERROR: Field {error.args[0]} not defiend in configuration file.")
-    except FileNotFoundError as error:
-        print(f"ERROR: Configuration file not found with path: {ARGS.config}")
-
-    stat_filename = f"{ARGS.config[:-5]}_stats.csv"
-    main_loop(config, stat_filename)
+        config = cfgs.Configurations(ARGS.config)
+        stat_filename = f"{ARGS.config[:-5]}_stats.csv"
+        timer_main_loop(config, stat_filename)
+    except cfgs.ConfigurationExeception as error:
+        print(error, end="\n\n")
+        input("Press Enter to exit")

@@ -1,6 +1,6 @@
 """ Class curse warper for display """
 import curses
-from number_map import number_map
+from src.number_map import number_map
 
 class Terminal():
     """ class warper curses to display """

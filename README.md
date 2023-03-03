@@ -45,3 +45,4 @@ $ pyinstaller --onefile daily_timer.py
 ### ToDo:
 - Scroll capabilities when there are more than 10 ten members
 - Add tooltip for keys at the bottom of screen
+- Test how make terminal responsive with windows size changes

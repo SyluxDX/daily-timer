@@ -23,3 +23,7 @@ dist
 
 # statistics files
 *_stats.csv
+
+# ignore user configuration files, but keep comfiguration template
+*.json
+!team.json

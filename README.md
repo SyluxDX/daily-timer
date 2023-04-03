@@ -1,7 +1,7 @@
 # daily-timer
 A Timer for Daily Standup meetings for the termianl
 
-For a timer with graphical interface see sister project (Daily Timer GUI)[https://github.com/SyluxDX/daily-timer-gui]
+For a timer with graphical interface see sister project [Daily Timer GUI](https://github.com/SyluxDX/daily-timer-gui)
 
 # Key Mapping
 | Key         | Action                              |

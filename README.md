@@ -1,5 +1,5 @@
 # daily-timer
-A Timer for Daily Standup meetings for the termianl
+A Timer for Daily Standup meetings for the terminal
 
 For a timer with graphical interface see sister project [Daily Timer GUI](https://github.com/SyluxDX/daily-timer-gui)
 

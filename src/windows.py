@@ -15,6 +15,7 @@ class Terminal():
     KEY_RIGHT: int = curses.KEY_RIGHT
     KEY_SPACE: int = ord(" ")
     KEY_EXIT: int = ord("q")
+    KEY_HELP: int = ord("h")
 
     def __init__(self):
         # init screen
@@ -70,6 +71,8 @@ class Terminal():
             11,
             self.middle_column//2,
         )
+
+        self.help_line = curses.newwin(2, 22, 22, self.middle_column-10)
 
     def __enter__(self):
         return self
@@ -140,6 +143,22 @@ class Terminal():
         self.users_window.erase()
         self.users_window.addstr("\n".join(text))
         self.users_window.refresh()
+    
+    def write_help_footer(self) -> None:
+        """ Write help and exit keys footer """
+        self.help_line.erase()
+        self.help_line.addstr("Press h for help menu\nPress q to exit")
+        self.help_line.refresh()
+
+    def write_help_menu(self) -> None:
+        """ Write/hide help keys menu """
+        self.update_users([
+            "Left Arrow", "  Select previous participant",
+            "Right Arrow", "  Select next participant",
+            "Space", "  Toggle timer pause/resume",
+            "h", "  Display/Hide help menu",
+            "q", "  Exit application",
+        ])
 
     ## General Terminal functions
     def get_key(self) -> int:

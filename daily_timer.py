@@ -108,6 +108,7 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
 
     users = UsersTimer(configs.participants, user_stats)
     seconds = 0
+    help_display = False
 
     ### create timer window
     with windows.Terminal() as terminal:
@@ -115,9 +116,11 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
         _ = terminal.get_key()
         terminal.update_color(terminal.GREEN)
 
-        # write timer and user list
+        # write timer and user list and help/exit info
         update_timer(configs, terminal, seconds)
         terminal.update_users(users.str_list())
+        # write help info
+        terminal.write_help_footer()
 
         while True:
             ## Get key press
@@ -129,6 +132,15 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
                 users.set_current_timer(seconds)
                 stats.write_daily_times(stats_path, users.get_list())
                 break
+            
+            ## Pressed help key
+            if key == terminal.KEY_HELP:
+                # toogle display/hide key help
+                help_display = not help_display
+                if help_display:
+                    terminal.write_help_menu()
+                else:
+                   terminal.update_users(users.str_list())
 
             ## Pressed start/pause key
             if key == terminal.KEY_SPACE:
@@ -139,6 +151,10 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
                     next_tick = datetime.utcnow() + _aux_tick
                 else:
                     terminal.update_color(terminal.GREEN)
+                # hides help menu if it is display
+                if help_display:
+                    terminal.update_users(users.str_list())
+                    help_display = False
 
             ## Press next person key
             if key == terminal.KEY_RIGHT:
@@ -151,6 +167,7 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
                 if running:
                     terminal.update_color(running_color)
                 terminal.update_users(users.str_list())
+                help_display = False
 
                 # reset next_tick
                 next_tick = datetime.utcnow() + _aux_tick
@@ -166,6 +183,7 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
                 if running:
                     terminal.update_color(running_color)
                 terminal.update_users(users.str_list())
+                help_display = False
 
                 # reset next_tick
                 next_tick = datetime.utcnow() + _aux_tick

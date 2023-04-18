@@ -9,6 +9,7 @@ For a timer with graphical interface see sister project [Daily Timer GUI](https:
 | Left Arrow  | Select previous participant on list |
 | Right Arrow | Select next participant on list     |
 | Space       | Toggle timer pause/resume           |
+| h           | Display/Hide help menu              |
 | q           | Exit application                    |
 
 # Configurations

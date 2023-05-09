@@ -118,7 +118,7 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
 
         # write timer and user list and help/exit info
         update_timer(configs, terminal, seconds)
-        terminal.update_users(users.str_list())
+        terminal.update_users(users.str_list(), users.current)
         # write help info
         terminal.write_help_footer()
 
@@ -140,7 +140,7 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
                 if help_display:
                     terminal.write_help_menu()
                 else:
-                   terminal.update_users(users.str_list())
+                   terminal.update_users(users.str_list(), users.current)
 
             ## Pressed start/pause key
             if key == terminal.KEY_SPACE:
@@ -153,7 +153,7 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
                     terminal.update_color(terminal.GREEN)
                 # hides help menu if it is display
                 if help_display:
-                    terminal.update_users(users.str_list())
+                    terminal.update_users(users.str_list(), users.current)
                     help_display = False
 
             ## Press next person key
@@ -166,7 +166,7 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
                 running_color = set_color(configs, terminal, seconds)
                 if running:
                     terminal.update_color(running_color)
-                terminal.update_users(users.str_list())
+                terminal.update_users(users.str_list(), users.current)
                 help_display = False
 
                 # reset next_tick
@@ -182,7 +182,7 @@ def timer_main_loop(configs: cfgs.Configurations, stats_path: str, ticks: float=
                 running_color = set_color(configs, terminal, seconds)
                 if running:
                     terminal.update_color(running_color)
-                terminal.update_users(users.str_list())
+                terminal.update_users(users.str_list(), users.current)
                 help_display = False
 
                 # reset next_tick

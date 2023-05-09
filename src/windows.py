@@ -63,6 +63,9 @@ class Terminal():
         # users variables
         self.users_nlines = 10
         self.users_ncols = 50
+        self.users_current = 0
+        self.users_start = 0
+        self.users_end = self.users_nlines -1
         ## Initiante user window
         # create window
         self.users_window = curses.newwin(
@@ -133,15 +136,43 @@ class Terminal():
             self.written_seconds = int(seconds)
 
     ## Users list related functions
-    def update_users(self, lines: list) -> None:
+    def update_users(self, lines: list, current:int) -> None:
         """ Update/refresh user list window with line list
 
         Number of lines and size are limited to window size """
-        text = []
-        for user in lines[:self.users_nlines]:
-            text.append(user[:self.users_ncols])
+
+        # number of lines fewer or equal than window size
+        if len(lines) <= self.users_nlines:
+            self.users_window.erase()
+            self.users_window.addstr("\n".join(lines))
+            self.users_window.refresh()
+            return
+
+        # scroll window
+        direction = current - self.users_current
+        if direction > 0:
+            if abs(direction) == len(lines) -1:
+                # jump from start to end
+                self.users_end = len(lines) - 1
+                self.users_start = self.users_end - (self.users_nlines -1)
+            elif current == self.users_end - 1 and self.users_end+1 != len(lines):
+            # near window right limit
+                self.users_start += 1
+                self.users_end += 1
+        
+        if direction < 0:
+            if abs(direction) == len(lines) - 1:
+                # jump from start to end
+                self.users_start = 0
+                self.users_end = self.users_nlines -1
+            elif current == self.users_start + 1 and self.users_start -1 != -1:
+            # near window left limit
+                self.users_start -= 1
+                self.users_end -= 1
+
+        self.users_current = current
         self.users_window.erase()
-        self.users_window.addstr("\n".join(text))
+        self.users_window.addstr("\n".join(lines[self.users_start:self.users_end+1]))
         self.users_window.refresh()
     
     def write_help_footer(self) -> None:
@@ -158,7 +189,7 @@ class Terminal():
             "Space", "  Toggle timer pause/resume",
             "h", "  Display/Hide help menu",
             "q", "  Exit application",
-        ])
+        ], 0)
 
     ## General Terminal functions
     def get_key(self) -> int:

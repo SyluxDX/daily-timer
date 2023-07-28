@@ -69,10 +69,10 @@ class Terminal():
         ## Initiante user window
         # create window
         self.users_window = curses.newwin(
-            self.users_nlines,
+            self.users_nlines+1,
             self.users_ncols,
             11,
-            self.middle_column//2,
+            self.middle_column-(self.users_ncols//2),
         )
 
         self.help_line = curses.newwin(2, 22, 22, self.middle_column-10)
@@ -143,8 +143,14 @@ class Terminal():
 
         # number of lines fewer or equal than window size
         if len(lines) <= self.users_nlines:
+            trim_text = ""
+            for line in lines:
+                if len(line) < self.users_ncols:
+                    trim_text += f"{line}\n"
+                else:
+                    trim_text += f"{line[:self.users_ncols]}"
             self.users_window.erase()
-            self.users_window.addstr("\n".join(lines))
+            self.users_window.addstr(trim_text)
             self.users_window.refresh()
             return
 
@@ -171,8 +177,14 @@ class Terminal():
                 self.users_end -= 1
 
         self.users_current = current
+        trim_text = ""
+        for line in lines[self.users_start:self.users_end+1]:
+            if len(line) < self.users_ncols:
+                trim_text += f"{line}\n"
+            else:
+                trim_text += f"{line[:self.users_ncols]}"
         self.users_window.erase()
-        self.users_window.addstr("\n".join(lines[self.users_start:self.users_end+1]))
+        self.users_window.addstr(trim_text)
         self.users_window.refresh()
     
     def write_help_footer(self) -> None:

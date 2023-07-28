@@ -23,6 +23,23 @@ For a timer with graphical interface see sister project [Daily Timer GUI](https:
 | stats.display     | bool        | Flag to display or hide statistics on member list               |
 | stats.lastDailies | int         | Number of last dailies to include in the statistic calculations |
 
+# Usage
+
+You can use the `--help` option to get more details about the options
+
+```
+usage: daily_timer.py [-h] [-c CONFIG]
+
+Timer for Daily Timer.
+
+options:
+  -h, --help            show this help message and exit
+  -c CONFIG, --config CONFIG
+                        path for configuration
+```
+
+The flag CONFIG is used to choose which configuration/team to use in the timer, the default is `team.json`
+
 # Build from Source
 ### Linux
 - Create a virtual enviroment
